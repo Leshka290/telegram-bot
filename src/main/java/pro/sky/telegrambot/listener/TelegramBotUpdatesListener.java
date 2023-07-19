@@ -59,7 +59,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 if (update.message().text().contains("/send")) {
                     var textToSend = messageText.substring(messageText.indexOf(" "));
 
-                    sendTaskMessage(textToSend);
+                    sendTaskMessage(textToSend, update.message().chat().id());
                 } else {
                     switch (messageText) {
                         case ("/start"): {
@@ -129,19 +129,16 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @Scheduled(cron = "${cron.scheduler}")
     private void sendTask() {
 
-        var users = userRepository.findAll();
         var tasks = notificationTaskRepository.findAll();
         LocalDateTime localDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         for (NotificationTask task : tasks) {
-            for (User user : users) {
                 if (task.getDateTime().equals(localDateTime)) {
-                    prepareAndSendMessage(user.getChatId(), task.getTask());
+                    prepareAndSendMessage(task.getUserId(), task.getTask());
                 }
-            }
         }
     }
 
-    private void sendTaskMessage(String message) {
+    private void sendTaskMessage(String message, Long userId) {
 
         Pattern pattern = Pattern.compile("\\d{2}.\\d{2}.\\d{4}.\\d{2}:\\d{2}:\\d{2}");
         Matcher matcher = pattern.matcher(message);
@@ -156,6 +153,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             notificationTask.setId(1L);
             notificationTask.setDateTime(localDateTime);
             notificationTask.setTask(message);
+            notificationTask.setUserId(userId);
 
             notificationTaskRepository.save(notificationTask);
         }

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 
@@ -15,8 +16,10 @@ import java.time.LocalDateTime;
 public class NotificationTask {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
+
+    private Long userId;
 
     private LocalDateTime dateTime;
 
